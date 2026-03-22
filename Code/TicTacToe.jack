@@ -1,0 +1,277 @@
+class TicTacToe {
+    field Array Board;
+    field char currentPlayer;
+    field char x;
+    field char o;
+    field int cursorRow;
+    field int cursorCol;
+
+    /** Constructor */
+    constructor TicTacToe new() {
+        let x = "X";
+        let o = "O";
+        let currentPlayer = x;
+        let Board = Array.new(9);
+        let cursorRow = 0;
+        let cursorCol = 0;
+        do initBoard();
+        do drawBoard();
+        do drawCursor();
+        return this;
+    }
+
+    /** Resets all squares to 0 */
+    method void initBoard() {
+        var int i;
+        let i = 0;
+        while (i < 9) {
+            let Board[i] = 0;
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /** Draws the board lines */
+    method void drawBoard() {
+        do Screen.drawLine(224, 32, 224, 224); // Left vertical
+        do Screen.drawLine(288, 32, 288, 224); // Right vertical
+        do Screen.drawLine(160, 96, 352, 96); // Top horizontal
+        do Screen.drawLine(160, 160, 352, 160); // Bottom horizontal
+        return;
+    }
+
+    /** Draws the cursor */
+    method void drawCursor() {
+        var int centerX, centerY;
+        let centerX = 192 + (cursorCol * 64); // Center X of the current cell
+        let centerY = 64 + (cursorRow * 64); // Center Y of the current cell
+        do Screen.setColor(true); // Highlight color
+        do Screen.drawCircle(centerX, centerY, 3); // Draw cursor as a small dot
+        return;
+    }
+
+    /** Clears the cursor and restores the cell content */
+    method void clearCursor() {
+        var int centerX, centerY;
+        var int cell;
+
+        let centerX = 192 + (cursorCol * 64); // Center X of the current cell
+        let centerY = 64 + (cursorRow * 64); // Center Y of the current cell
+        let cell = (cursorRow * 3) + cursorCol;
+
+        do Screen.setColor(false); // Background color
+        do Screen.drawCircle(centerX, centerY, 3); // Clear cursor
+
+        // Restore X or O if needed
+        if (Board[cell] = x) {
+            do Screen.setColor(true);
+            do Graphic.drawX(centerX, centerY);
+        } else {
+            if (Board[cell] = o) {
+                do Screen.setColor(true);
+                do Graphic.drawO(centerX, centerY);
+            }
+        }
+        return;
+        }
+
+    /** Handles user input */
+    method void handleInput() {
+        var char key;
+        var int cellIndex;
+        var int centerX, centerY;
+
+        // Read input
+        let key = Keyboard.readChar();
+
+        // Move cursor
+        if (key = 131) { // Up
+            if (cursorRow > 0) {
+                do clearCursor();
+                let cursorRow = cursorRow - 1;
+                do drawCursor();
+            }
+        }
+
+        if (key = 133) { // Down
+            if (cursorRow < 2) {
+                do clearCursor();
+                let cursorRow = cursorRow + 1;
+                do drawCursor();
+            }
+        }
+
+        if (key = 130) { // Left
+            if (cursorCol > 0) {
+                do clearCursor();
+                let cursorCol = cursorCol - 1;
+                do drawCursor();
+            }
+        }
+
+        if (key = 132) { // Right
+            if (cursorCol < 2) {
+                do clearCursor();
+                let cursorCol = cursorCol + 1;
+                do drawCursor();
+            }
+        }
+
+        if (key = 128) { // Enter to select
+            let cellIndex = (cursorRow * 3) + cursorCol;
+            if (Board[cellIndex] = 0) { // If cell is empty
+                let centerX = 192 + (cursorCol * 64);
+                let centerY = 64 + (cursorRow * 64);
+                if (currentPlayer = x) {
+                    let Board[cellIndex] = x;
+                    do Graphic.drawX(centerX, centerY); // Call Graphic's drawX
+                } else {
+                    let Board[cellIndex] = o;
+                    do Graphic.drawO(centerX, centerY); // Call Graphic's drawO
+                }
+
+                // Check for winner
+                if (checkForWinner()) {
+                    do announceWinner();
+                    do gameReset();
+                    return;
+                }
+
+                // Check for tie
+                if (checkForEven()) {
+                    do announceTie();
+                    do gameReset();
+                    return;
+                }
+
+                // Switch player
+                do switchPlayer();
+            }
+        }
+        return;
+    }
+
+    /** Checks for a winner */
+    method boolean checkForWinner() {
+        // Check rows
+        if (checkLine(Board[0], Board[1], Board[2])) {
+            // Draw line for row 1
+            do Screen.drawLine(192, 64, 320, 64); 
+            return true;
+        }
+        if (checkLine(Board[3], Board[4], Board[5])) {
+            // Draw line for row 2
+            do Screen.drawLine(192, 128, 320, 128); 
+            return true;
+        }
+        if (checkLine(Board[6], Board[7], Board[8])) {
+            // Draw line for row 3
+            do Screen.drawLine(192, 192, 320, 192); 
+            return true;
+        }
+
+        // Check columns
+        if (checkLine(Board[0], Board[3], Board[6])) {
+            // Draw line for column 1
+            do Screen.drawLine(192, 64, 192, 192);
+            return true;
+        }
+
+        if (checkLine(Board[1], Board[4], Board[7])) {
+            // Draw line for column 2
+            do Screen.drawLine(256, 64, 256, 192); 
+            return true;
+        }  
+        if (checkLine(Board[2], Board[5], Board[8])) {
+            // Draw line for column 3
+            do Screen.drawLine(320, 64, 320, 192); 
+            return true;
+        }
+
+        // Check diagonals
+        if (checkLine(Board[0], Board[4], Board[8])) {
+            // Draw diagonal from top-left to bottom-right
+            do Screen.drawLine(192, 64, 320, 192);
+            return true;
+        }
+        if (checkLine(Board[2], Board[4], Board[6])) {
+            // Draw diagonal from top-right to bottom-left
+            do Screen.drawLine(320, 64, 192, 192);
+            return true;
+        }
+
+        return false; // No winner found
+    }
+
+    /** Checks if three squares are the same and not 0 */
+    method boolean checkLine(int a, int b, int c) {
+        return (~(a = 0)) & (a = b) & (b = c);
+    }
+
+    /** Announces the winner */
+    method void announceWinner() {
+        /** do Screen.clearScreen(); */
+        do Output.moveCursor(1, 25);
+        if (currentPlayer = x) {
+            do Output.printString("X IS THE WINNER!!");
+        }
+        if (currentPlayer = o) {
+            do Output.printString("O IS THE WINNER!!");
+        }
+        do Output.println();
+        do waitForRestart();
+        return;
+    }
+
+    /** Announces a tie */
+    method void announceTie() {
+        do Screen.clearScreen();
+        do Output.moveCursor(10, 16);
+        do Output.printString("It's A Tie! Let's play again :) ");
+        do Output.println();
+        do waitForRestart();
+        return;
+    }
+
+    /** Waits for user input to restart the game */
+    method void waitForRestart() {
+        do Output.moveCursor(21, 18);
+        do Output.printString("PRESS ANY KEY TO START AGAIN!");
+        do Keyboard.readChar();
+        return;
+    }
+
+    /** Switches the current player */
+    method void switchPlayer() {
+    if (currentPlayer = x) {
+        let currentPlayer = o;
+    } else {
+        let currentPlayer = x;
+    }
+    return;
+}
+
+    /** Checks for a tie */
+    method boolean checkForEven() {
+        var int i;
+        let i = 0;
+        while (i < 9) {
+            if (Board[i] = 0) {
+                return false;
+            }
+            let i = i + 1;
+        }
+        return true;
+    }
+
+    /** Resets the game */
+    method void gameReset() {
+        do Screen.clearScreen();
+        do initBoard();
+        do drawBoard();
+        let cursorRow = 0;
+        let cursorCol = 0;
+        do drawCursor();
+        return;
+    }
+}

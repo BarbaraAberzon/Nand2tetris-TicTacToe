@@ -1,0 +1,32 @@
+class Main {
+    function void main(){
+        var TicTacToe Game ;
+        var char p,k;
+        
+        // Initialize the game
+        do Output.moveCursor(5, 6);
+        do Output.printString("Welcome to TicTacToe Game! Press Enter to continue");
+        let k = Keyboard.readChar();
+        if (k = 128){
+            do Screen.clearScreen();
+            do Output.moveCursor(5, 23);
+            do Output.printString("X plays first!");
+            do Output.println();
+            do Output.moveCursor(2, 16);
+            do Output.printString("-> Use arrow keys to move <-");
+            do Output.moveCursor(8, 16);
+            do Output.printString("PRESS ANY KEYBOARD TO START");
+        
+            let p = Keyboard.readChar();
+            do Screen.clearScreen();
+
+            let Game = TicTacToe.new();
+            do Game.drawBoard();
+
+            while ((Game.checkForWinner() = false) & (Game.checkForEven() = false)) {
+                do Game.handleInput();
+            }
+        }
+        return;  
+    }
+}

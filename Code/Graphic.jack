@@ -1,0 +1,28 @@
+class Graphic { 
+
+    // Function to draw an "O" at (cx, cy) with a given radius
+    function void drawO(int x, int y){
+        // Draw an O centered at the given x, y coordinates by making a solid black circle, then a slightly smaller white circle inside of it.
+        do Screen.drawCircle(x, y, 20);
+        do Screen.setColor(false);
+        do Screen.drawCircle(x, y, 19);
+        do Screen.setColor(true);
+        return;
+    }
+
+    // Function to draw an "X" at (cx, cy) with a given size
+    function void drawX(int x, int y){
+        // Draw an X centered at the given x, y coordinates.
+        var int left, right, top, bottom;
+
+        let left = x - 15;
+        let right = x + 15;
+        let top = y + 15;
+        let bottom = y - 15;
+        do Screen.setColor(true);
+        do Screen.drawLine(left, top, right, bottom);
+        do Screen.drawLine(right, top, left, bottom);
+
+        return;
+    }
+}
