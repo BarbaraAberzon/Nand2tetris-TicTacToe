@@ -20,6 +20,10 @@ We have built 3 classes to support our game.
 
 - **Graphic.jack**: Drawing utilities — renders X (two diagonal lines) and O (filled circle with a smaller white circle inside) on the screen.
 
+## Demo
+
+[Watch the demo video](https://drive.google.com/file/d/1R1LLIOXs60itqFcV0pLOWUWPV_FONgQS/view)
+
 ## How to Play
 
 1. Launch the program — a welcome screen will appear.
